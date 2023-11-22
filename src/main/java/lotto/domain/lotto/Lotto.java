@@ -1,5 +1,7 @@
 package lotto.domain.lotto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Lotto extends LottoRule {
@@ -7,7 +9,8 @@ public class Lotto extends LottoRule {
 
     public Lotto(List<Integer> numbers) {
         validate(numbers);
-        this.numbers = numbers;
+
+        this.numbers = sortNumbers(numbers);
     }
 
     @Override
@@ -17,5 +20,13 @@ public class Lotto extends LottoRule {
 
     public List<Integer> getNumbers() {
         return numbers;
+    }
+
+
+    private List<Integer> sortNumbers(List<Integer> numbers){
+        List<Integer> sortedNumber = new ArrayList<>(numbers);
+        Collections.sort(sortedNumber);
+
+        return sortedNumber;
     }
 }

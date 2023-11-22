@@ -29,6 +29,21 @@ public enum  Prize {
         return totalPrize;
     }
 
+    public static Prize getPrize(int matchCount, boolean isMatchBonus) {
+        if (matchCount == 6) {
+            return Prize.SIX_MATCH;
+        } else if (matchCount == 5 && isMatchBonus) {
+            return Prize.FIVE_MATCH_BONUS;
+        } else if (matchCount == 5) {
+            return Prize.FIVE_MATCH;
+        } else if (matchCount == 4) {
+            return Prize.FOUR_MATCH;
+        } else if (matchCount == 3) {
+            return Prize.THREE_MATCH;
+        }
+        return Prize.FAIL;
+    }
+
     public int getPrice() {
         return price;
     }
