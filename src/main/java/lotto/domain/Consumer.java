@@ -3,34 +3,24 @@ package lotto.domain;
 
 import java.util.List;
 import lotto.domain.lotto.Lotto;
-import lotto.domain.lotto.LottoPrice;
-import lotto.exception.ExceptionMessage;
+import lotto.domain.lotto.Lottos;
 
 public class Consumer {
-    private int purchaseAmount;
-    private List<Lotto> lottos;
+    private final Purchase purchase;
+    private final Lottos lottos;
 
-    public int getPurchaseAmount() {
-        return purchaseAmount;
-    }
 
-    public List<Lotto> getLottos() {
-        return lottos;
-    }
-
-    public void setPurchaseAmount(int purchaseAmount) {
-        amountValidate(purchaseAmount);
-        this.purchaseAmount = purchaseAmount;
-    }
-
-    public void setLottos(List<Lotto> lottos) {
+    public Consumer(Purchase purchase, Lottos lottos) {
+        this.purchase = purchase;
         this.lottos = lottos;
     }
 
-    void amountValidate(int purchaseAmount){
-        int price = LottoPrice.THOUSAND_WON.getPrice();
-        if(purchaseAmount % price != 0){
-            ExceptionMessage.PURCHASE_AMOUNT_NOT_DIVIDED.throwException();
-        }
+    public int getPurchaseAmount() {
+        return purchase.getPurchaseAmount();
     }
+
+    public List<Lotto> getLottos() {
+        return lottos.getLottos();
+    }
+
 }

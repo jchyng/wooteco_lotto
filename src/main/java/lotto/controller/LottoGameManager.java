@@ -2,85 +2,67 @@ package lotto.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import lotto.domain.Consumer;
 import lotto.domain.Prize;
 import lotto.domain.Winning;
-import lotto.domain.lotto.Lotto;
-import lotto.service.LottoStore;
+import lotto.domain.lotto.Lottos;
+import lotto.domain.Purchase;
+import lotto.service.PrizeCalculator;
 import lotto.view.InputView;
 import lotto.view.OutputView;
 
 public class LottoGameManager {
-    private final InputView inputView;
-    private final OutputView outputView;
-    private final LottoStore lottoStore;
+    private final InputView inputView = new InputView();
+    private final OutputView outputView = new OutputView();
+    private final PrizeCalculator prizeCalculator;
 
-    private Consumer consumer = new Consumer();
-    private Winning winning = new Winning();
-
-    public LottoGameManager(InputView inputView, OutputView outputView, LottoStore lottoStore) {
-        this.inputView = inputView;
-        this.outputView = outputView;
-        this.lottoStore = lottoStore;
+    public LottoGameManager(PrizeCalculator prizeCalculator) {
+        this.prizeCalculator = prizeCalculator;
     }
 
     public void play() {
-        enterPurchaseAmount();
-        printLottos();
-        enterWinningNumber();
-        enterBonusNumber();
-        printTotalPrizeAndRevenue();
+        Consumer consumer = createConsumerWithInputAmount();
+        outputView.printLottos(consumer.getLottos());
+
+        Winning winning = createWinningNumber();
+
+        printTotalPrizeAndRevenue(consumer, winning);
     }
 
-    private void enterPurchaseAmount() {
-        while (true) {
-            try {
-                int purchaseAmount = inputView.enterPurchaseAmount();
-                consumer.setPurchaseAmount(purchaseAmount);
-                break;
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-            }
-        }
+    private Consumer createConsumerWithInputAmount() {
+        return doWorkUntilComplete(() -> {
+            int purchaseAmount = inputView.enterPurchaseAmount();
+            Purchase purchase = new Purchase(purchaseAmount);
+
+            return new Consumer(purchase, new Lottos(purchase));
+        });
     }
 
-    private void printLottos() {
-        List<Lotto> lottos = lottoStore.createLottos(consumer.getPurchaseAmount());
-        consumer.setLottos(lottos);
+    private Winning createWinningNumber() {
+        return doWorkUntilComplete(() -> {
+            List<Integer> numbers = inputView.enterWinningNumber();
+            int bonusNumber = inputView.enterBonusNumber();
 
-        outputView.printLottos(consumer);
+            return new Winning(numbers, bonusNumber);
+        });
     }
 
-    private void enterWinningNumber() {
-        while (true) {
-            try {
-                List<Integer> numbers = inputView.enterWinningNumber();
-                winning.setNumbers(numbers);
-                break;
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-    }
-
-    private void enterBonusNumber(){
-        while (true) {
-            try {
-                int bonusNumber = inputView.enterBonusNumber();
-                winning.setBonusNumber(bonusNumber);
-                break;
-            } catch (IllegalArgumentException e){
-                System.out.println(e.getMessage());
-            }
-        }
-    }
-
-    private void printTotalPrizeAndRevenue(){
-        Map<Prize, Integer> totalPrize = winning.calcTotalPrize(consumer.getLottos());
+    private void printTotalPrizeAndRevenue(Consumer consumer, Winning winning) {
+        Map<Prize, Integer> totalPrize = prizeCalculator.calcTotalPrize(consumer.getLottos(), winning);
         outputView.printTotalPrize(totalPrize);
 
-        double revenueRate = winning.calcRevenueRate(totalPrize, consumer.getPurchaseAmount());
+        double revenueRate = prizeCalculator.calcRevenueRate(totalPrize, consumer.getPurchaseAmount());
         outputView.printRevenueRate(revenueRate);
     }
 
+    private <T> T doWorkUntilComplete(Supplier<T> work) {
+        while (true) {
+            try {
+                return work.get();
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
 }

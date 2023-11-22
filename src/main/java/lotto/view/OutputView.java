@@ -1,15 +1,16 @@
 package lotto.view;
 
+import java.util.List;
 import java.util.Map;
 import lotto.domain.Consumer;
 import lotto.domain.Prize;
+import lotto.domain.lotto.Lotto;
 
 public class OutputView {
 
-    public void printLottos(Consumer consumer) {
-        System.out.println(consumer.getLottos().size() + "개를 구매했습니다.");
-        consumer.getLottos()
-                .forEach(System.out::println);
+    public void printLottos(List<Lotto> lottos) {
+        System.out.println(lottos.size() + "개를 구매했습니다.");
+        lottos.forEach(System.out::println);
         System.out.println();
     }
 
